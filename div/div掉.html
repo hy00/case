@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title></title>
+<style>
+#box {
+	width: 1000px;
+	height: 400px;
+	position: relative;
+}
+#box div {
+	float: left;
+	margin-right: 10px;
+	width: 48px;
+	height: 48px;
+	border: 1px solid #000;
+	background: hotpink;
+}
+</style>
+<script src="MTween.js"></script>
+<script>
+window.onload = function() {
+	var box = getId("box");
+	var div = getTag(box,"div");
+	var w = css(div[0],"width");
+	var now = 0;
+	var timer = 0;
+	//console.log(div);
+	for(var i = 0; i < div.length; i++) {
+		div[i].style.top = div[i].offsetTop + "px";  //设置div的top值
+		div[i].style.left = div[i].offsetLeft + "px";  //设置div的left值
+	}
+	for(var i = 0; i < div.length; i++) {
+		div[i].style.position = "absolute";  //设置div的绝对定位
+	}
+	
+	timer = setInterval(  //开启间隔定时器
+		function() {
+			if(now < div.length) {  //当now小于div的length
+				out(div[now]);  //调用out函数  ，实参为调用div的每一项
+				now++;  //now++
+			} else {
+				clearInterval(timer);  //当now大于div的length  关闭定时器
+			}
+		},100
+	);
+	function out(fn) {  //out函数
+		mTween(fn,{top: 200},500,"linear",function() { //回调函数back(fn) 与out(fn)相互回调
+			back(fn);
+		});
+	};
+	function back(fn) {
+		mTween(fn,{top: 0},500,"linear",function() {  //回调函数out(fn)  与back(fn)相互回调
+			out(fn);
+		});
+	};
+};
+</script>
+</head>
+<body>
+<div id="box">
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+</div>
+</body>
+</html>
