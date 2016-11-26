@@ -1,0 +1,196 @@
+
+git
+	工具，版本控制
+github
+	***网站，社交平台，开源项目，远程仓库
+	
+svn与git区别
+集成式
+	有个中央服务器，所有的版本都要通过中央服务器进行控制。
+分布式
+	每个计算机都是台版本控制器，不需要网络就能进行版本控制。	
+github作用
+	存储版本的远程仓库
+	
+git + github
+git + 码云
+git + gitlab
+
+
+新建项目：
+	在github上，有个加号，第一个就是新建项目
+	填写项目名称、项目的描述、（勾选）README.md -> 点击创建按钮
+	
+	
+cd命令进入目录  比如:c/github5/2016-11-16（空文件夹）
+	第一种：
+		cd c:
+		cd github5
+			查看文件：
+				ll 或者  ls 查看
+				
+		cd 2016-11-16
+	第二种：
+		cd c:\github5\2016-11-16
+	
+	
+	小技巧：
+		可以通过tab键自动补全
+		
+		cd .. 返回上一层目录
+		
+		按方向上键重新查找上一次回话输入的命令
+		
+	git clone 远程地址。
+	
+
+git的三个区
+	工作区（本地）
+	暂存区
+		作为过渡层
+		避免误操作
+		保护工作区和版本区
+		分支处理
+	版本区（库）
+
+在工作区创建一个文件去查看状态（git status） 显示红色
+
+将工作区放到暂存区
+	git add 文件名
+
+将暂存区放到版本区
+	git commit -m "注释"
+	
+查看版本：
+	git log(如果出现:号，按q键返回)
+
+
+对比：
+	查看暂存区与工作区的差异：
+		git diff
+	
+	查看暂存区与版本区的差异：
+		git diff --cached
+	
+	查看本地与版本区的差异：
+		git diff master
+		
+撤销：
+	暂存区的控制撤销到工作区
+		git reset HEAD 文件名
+	
+	工作区代码还原成暂存区或版本区
+		git checkout -- 文件名 
+		
+	如果有2个以上文件，一个提交到版本库了，
+	另一个忘记提交，可以先将没提交的文件拉到缓存区，
+	然后通过
+		git commit -m "注释" --amend 撤销回来，
+		最后自动一次性提交暂存区中的所有文件，
+		git log查看是否提交成功
+
+小技巧：
+	快速增加多个文件到暂存区：
+		git add .
+	
+	快速版本控制：
+		git commit -a -m "注释"
+		
+	清除：
+		clear
+
+删除：
+	前提本地删除的时候，也想删除暂存区
+		git rm 文件名
+	
+	
+	一次性删除暂存区及本地：
+		git rm -f 文件名
+		
+	不想删除本地，只想删除暂存区
+		git rm --cached 文件名
+
+恢复（回滚）：
+	回滚指定文件：
+		git checkout 文件名
+	
+	回滚指定版本文件：
+		git checkout 版本号（5位） 文件名
+		
+	回滚所有整个版本的文件：
+		git reset --hard 版本号
+		
+	git reflog 查看已经操作过的历史记录
+	
+	回滚当前历史记录的上一个记录
+		git reset --hard HEAD^
+	
+	回滚当前历史记录的上几个记录
+		git reset --hard HEAD~2
+	
+	
+同步远程仓库：
+	git push origin master
+	
+	origin : 远程仓库的名字（默认的）
+		查看远程仓库的名字：
+			git remote
+	
+	git remote -v 可以查看拉取下来的地址和推送的地址是否保持一致。
+			
+
+
+设置多人开发权限:
+	1.先进入github项目
+	2.点击 加号 New collaborator
+	3.加开发伙伴
+	4.等待伙伴确认
+	5.有权限的伙伴,克隆地址
+	6.进行开发
+
+如果有冲突的情况：
+	1.git fetch  先将远程仓库的代码拉取下来
+	2.git diff master origin/master  查看版本库与远程的差异（冲突）
+	3.git merge origin/master  版本库与远程的代码进行合并
+	4.手动修改冲突
+	5.修改完之后，版本控制 -> push
+
+如果没有权限还要参与别人的项目：
+	1.fork下别的人项目
+	2.自己仓库会多一份fork到的项目
+	3.git clone 项目
+	4.该修改就修改，该push就push
+	5.创建一个new pull request
+	6.等待别人回复
+	
+当收到别人发来的修改请求：
+	1.先查看别人修改了什么？
+	2.如果合适就合并
+		点击 merge pull request按钮进行合并
+
+
+分支：
+	默认为matser分支
+	
+	查看分支：
+		git branch    (当前分支会有*号)
+		
+	创建分支：
+		git branch 分支名
+	
+	切换分支:
+		git checkout 分支名
+	
+	快速创建并且切换
+		git checkout -b 新的分知名
+	
+	git branch -d 分支名 （合并完分支后删除）
+
+	git branch -D 分支名 （强制删除没有合并的分支）
+	
+	git merge 分支名 （合并分支）
+	
+	git branch --no-merged （查看没有合并的分支）
+
+	查看当前主干上有多少个分支已经合并:
+		git branch --merged
