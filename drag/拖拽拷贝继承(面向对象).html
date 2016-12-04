@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title></title>
+<style>
+#box {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100px;
+	height: 100px;
+	background: red;
+}
+#box2 {
+	position: absolute;
+	top: 0;
+	left: 150px;
+	width: 100px;
+	height: 100px;
+	background: deeppink;
+}
+</style>
+</head>
+<body>
+	<div id="box"></div>
+	<div id="box2"></div>
+</body>
+</html>
+<script>
+	function Drag(id) {
+		this.box = document.getElementById(id);
+		this.disX = 0;
+		this.disY = 0;
+	};
+	
+	Drag.prototype.info = function() {  //事件
+		var _this = this;
+		this.box.addEventListener('mousedown',down);  //事件和函数分开写 （事件）
+		function down(e) {
+			_this.downfn(e);  //事件和函数分开写 （函数）
+		};
+	};
+	Drag.prototype.downfn = function(e) {
+		var _this = this;
+		this.disX = e.pageX - this.box.offsetLeft;
+		this.disY = e.pageY - this.box.offsetTop;
+		
+		document.addEventListener('mousemove',move);  //事件和函数分开写 （事件）
+		function move(e) {
+			_this.movefn(e);  //事件和函数分开写 （函数）
+		};
+		
+		document.addEventListener('mouseup',up);
+		function up() {
+			_this.upfn(move,up);  //事件和函数分开写 （函数）  //move,up事件名做为实参数给upfn
+		};
+		
+		e.preventDefault();
+	};
+	Drag.prototype.movefn = function(e) {
+		var l = e.pageX - this.disX;
+		var t = e.pageY - this.disY;
+		this.box.style.left = l + 'px';
+		this.box.style.top = t + 'px';
+	};
+	Drag.prototype.upfn = function(move,up) { //形参
+		document.removeEventListener('mousemove',move);
+		document.removeEventListener('mouseup',up);
+	};
+	
+	//用继承让box2添加限制边界
+	//属性继承
+	function Drag2(id) {
+		//console.log(this)   //this指向了Drag2
+		Drag.call(this,id);  //Drag2继承了Drag的属性    //this指向了Drag call改变了this的指向，从Drag2指向的Drag
+	};
+	
+	//console.log(Drag.prototype)  //Drag.prototype是个对象，里面放的是Drag自身的方法
+	//方法继承
+	for(var attr in Drag.prototype) {  //用循环继承Drag的方法
+		if(Drag.prototype.hasOwnProperty(attr)) {  //只赋值Drag的自身上的方法
+			Drag2.prototype[attr] = Drag.prototype[attr];  //把Drag的方法*赋值*给Drag2
+		}
+	}
+	
+	//新写的Drag2上的movefn方法覆盖了Drag2继承之后的movefn方法
+	Drag2.prototype.movefn = function(e) {  
+		var l = e.pageX - this.disX;
+		var t = e.pageY - this.disY;
+		//限制范围
+		if(l < 0) {
+			l = 0;
+		} else if(l > document.documentElement.clientWidth - this.box.clientWidth) {
+			l = document.documentElement.clientWidth - this.box.clientWidth;
+		}
+		if(t < 0) {
+			t = 0
+		} else if(t > document.documentElement.clientHeight - this.box.clientHeight) {
+			t = document.documentElement.clientHeight - this.box.clientHeight;
+		}
+		this.box.style.left = l + 'px';
+		this.box.style.top = t + 'px';
+	};
+	
+	var d = new Drag('box');
+	var d2 = new Drag2('box2');
+	
+	d.info();
+	d2.info();
+	console.log(d2)
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
