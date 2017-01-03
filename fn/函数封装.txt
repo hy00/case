@@ -1,0 +1,29 @@
+
+mTween.js（   封装的是元素运动样式（匀速，加减速，弹性，回弹，碰撞等		） 调用  mTween(el,target,time,type，callBack)；
+	    	el 元素，target(是对象例如：{width: 300,height: 			300}),time(时间),type(运动类型) callBack(是个函数，需			要执行完一个动画之后，再执行一个动画的内容，如果不写			就是同时执行几个动画
+
+	计算后的样式 css(el,attr) el(元素) attr（样式）
+
+	获取元素 id TagName  className
+
+	）（用总时间控制）
+
+miaov.js   与mTween.js相比，增加了transform的运动；
+
+bufferMove.js 运动函数，缓冲运动   20161101
+
+linearMove.js   运动函数，匀速运动  （用每次走多大距离控制）
+
+
+html5shiv.min.js  调用h5标签（处理IE兼容问题）
+
+DD_belatedPNG_0.0.8a.js  IE6处理png图片
+
+shake.js  抖动函数的封装 （包含获取计算后的样式 和 抖动函数）
+
+duang.js 碰撞检测，id:要拖拽的id
+		id2:要碰撞的元素id
+		fnDuang:碰到之后做啥
+		fnNoDuang：没碰到的时候做啥
+
+myWheel.js 滚轮事件(兼容) ： obj (要在哪个元素上面滚动) callBack(滚动后要执行的函数  要传一个参数down)   20161115
