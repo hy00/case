@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title></title>
+<style>
+body {
+	margin: 0;
+}
+img {
+	vertical-align: top;
+	border: none;
+}
+#wrap {
+	margin: 30px;
+	width: 800px;
+	height: 200px;
+}
+#wrap div {
+	float: left;
+	width: 200px;
+	height: 250px;
+}
+.left {
+	margin-right: 20px;
+	position: relative;
+}
+.right {
+	display: none;
+	overflow: hidden;
+	position: relative;
+}
+.left span {
+	display: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100px;
+	height: 100px;
+	background: yellow;
+	opacity: .5;
+	cursor: move;
+}
+.big {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+</style>
+</head>
+<body>
+<div id="wrap">
+	<div class="left">
+		<img src="1.jpg" width = '200px' height="250px"/>
+		<span class="box"></span>
+	</div>
+	<div class="right">
+		<img src="1.jpg" width = '400px' height="500px" class="big"/>
+	</div>
+</div>
+</body>
+</html>
+<script>
+(function() {
+	var left = document.querySelector('.left');
+	var right = document.querySelector('.right');
+	var box = left.querySelector('.box');
+	var big = right.querySelector('.big');
+	left.onmouseover = function(e) {
+		box.style.display = 'block';
+		right.style.display = 'block';
+		left.onmousemove = function(e) {
+			centerX = e.pageX - left.offsetLeft - box.offsetWidth/2;
+			centerY = e.pageY - left.offsetTop - box.offsetHeight/2;
+			
+			if(centerX < 0) {
+				centerX = 0;
+			} else if(centerX > left.clientWidth - box.offsetWidth) {
+				centerX =  left.clientWidth - box.offsetWidth;
+			} 
+			if(centerY < 0) {
+				centerY = 0;
+			} else if(centerY > left.clientHeight - box.offsetHeight) {
+				centerY = left.clientHeight - box.offsetHeight;
+			}
+			
+			//比例  bigLeft /boxLeft = bigWidth - rightWidth / LeftWidth-boxWidth
+			var scaleX = centerX/(left.offsetWidth - box.offsetWidth);
+			var scaleY = centerY/(left.offsetHeight - box.offsetHeight);
+			
+			
+			var bigX = scaleX * (big.offsetWidth - right.offsetWidth);
+			var bigY = scaleY * (big.offsetHeight - right.offsetHeight);
+			
+			box.style.left = centerX + 'px';
+			box.style.top = centerY + 'px';
+			
+			big.style.left = -bigX+ 'px';
+			big.style.top = -bigY+ 'px';
+		};
+	};
+	left.onmouseout = function() {
+		box.style.display = 'none';
+		right.style.display = 'none';
+	};
+})();
+</script>
