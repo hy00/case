@@ -1,0 +1,242 @@
+﻿<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title></title>
+<link href="style/weibo.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div class="znsArea">
+<!--留言-->
+     <div class="takeComment">
+        <textarea name="textarea" class="takeTextField" id="tijiaoText"></textarea>
+        <div class="takeSbmComment">
+            <input type="button" id="btn1" class="inputs" value="" />
+            <span>(可按 Enter 回复)</span>
+        </div>
+    </div>
+<!--已留-->
+    <div class="commentOn">
+        <div class="messList" id="div1" style="height:502px">
+        	
+        	<!--<div class="reply">
+                <p class="replyContent">卫士，新款卫士将推出总共14种车身式样。其中， XS旅行款车型售价为32295英镑(约33.6万元)。</p>
+                <p class="operation">
+                    <span class="replyTime">2018-09-08 16:37:60</span>
+                    <span class="handle">
+                    	<a href="javascript:;" class="top">0</a>
+                        <a href="javascript:;" class="down_icon">0</a>
+                        <a href="javascript:;" class="cut">删除</a>
+                    </span>
+                </p>
+            </div>-->
+            
+        </div>
+        <div class="page" id="page">
+        	<a href="javascript:;" class="active">1</a>
+        	<a href="javascript:;">2</a>
+        	<a href="javascript:;">3</a>
+        </div>
+    </div>
+</div>
+</body>
+<script src="myAjax_x2.js" type="text/javascript" charset="utf-8"></script>
+<script>
+//(function() {
+	function Create() {   //构造函数
+		this.wrap = document.getElementById('div1');
+		this.txt = document.getElementById('tijiaoText');
+//		this.btn = document.getElementById('btn1');
+		this.top = document.getElementsByClassName('top');
+		this.down = document.getElementsByClassName('down_icon');
+		this.cut = document.getElementsByClassName('cut');
+		
+	}
+	
+	Create.prototype = {   
+		constructor: Create,
+		info: function(obj) {
+			var _this = this;
+			obj.addEventListener('click',function() {
+				_this.Event();
+			});
+			
+//			obj.onclick = function() {
+//				_this.Event(obj);
+//			};
+			this.onload(1);  //默认第一页的数据
+		},
+		Event: function() {  //事件要执行的事
+			var _this = this;
+			var val = this.txt.value.trim();
+			if(val) {
+				ajax({
+					url:'php/weibo.php',
+					data:{
+						act:'add',
+						content:val
+					},
+					succ: function(json){
+						//console.log(json)
+						var child = _this.wrap.children[0];
+						if(!json.error) {
+							_this.onload(1);  //数据添加内容
+							_this.txt.value = '';
+//							var div = _this.add(val,_this.time(json.time));
+//							_this.wrap.insertBefore(div,child);
+//							_this.txt.value = '';
+//							if(_this.wrap.children.length > 6) {
+//								_this.wrap.removeChild(_this.wrap.children[6]);
+//							}
+						}
+					}
+				});
+			} else {
+				alert('不能为空');
+			}
+		},
+		add: function(val,time,top,down) {  //增加布局
+			var div = document.createElement('div');
+			div.className = 'reply';
+			div.innerHTML = ` <p class="replyContent">${val}</p>
+				                <p class="operation">
+				                    <span class="replyTime">${time}</span>
+				                    <span class="handle">
+				                    	<a href="javascript:;" class="top">${top}</a>
+				                        <a href="javascript:;" class="down_icon">${down}</a>
+				                        <a href="javascript:;" class="cut">删除</a>
+				                    </span>
+				                </p>`;
+			return div;
+		},
+		time: function(time) {  //发表时间
+			var tim = '';
+			var t = new Date(time*1000);
+			var year = t.getFullYear();
+			var mon = t.getMonth();
+			var day = t.getDate();
+			var hou = t.getHours();
+			var min = t.getMinutes();
+			var sec = t.getSeconds();
+			tim = year+'-'+this.toDB(mon)+'-'+this.toDB(day)+' '+this.toDB(hou)+':'+this.toDB(min)+':'+this.toDB(sec);
+			//2018-09-08 16:37:60
+			return tim;
+		},
+		toDB: function(n) {
+			return n<10?'0'+n:''+n;
+		},
+		onload: function(n) {  //加载数据
+//			weibo.php?act=get&page=2
+			this.wrap.innerHTML = '';  //每刷新一次的时候先清空在重新加载
+			var _this = this;
+			ajax({
+				url: 'weibo.php',
+				data: {
+					act: 'get',
+					page: n
+				},
+				succ: function(arr) {
+					console.log(arr)
+					arr.forEach(function(e,i) {  //循环数组中的每一位
+						var div = _this.add(e.content,_this.time(e.time));
+//						var div = _this.add(e.content,_this.time(e.time),_this.topN(e.acc,e.id),_this.downN(e.ref,e.id));
+						_this.wrap.appendChild(div);
+					});
+					
+					
+				}
+			});
+		},
+		topN: function(nub,num) {  //顶
+			//weibo.php?act=acc&id=num
+			ajax({
+				url: 'weibo.php',
+				data: {
+					act: 'acc',
+					id: num
+				},
+				succ: function(json) {
+					if(!json.error) {
+						return nub;
+					}
+				}
+			});
+		},
+		downN: function(nub,num) {  //顶
+			//weibo.php?act=ref&id=num	
+			ajax({
+				url: 'weibo.php',
+				data: {
+					act: 'ref',
+					id: num
+				},
+				succ: function(json) {
+					if(!json.error) {
+						return nub;
+					}
+				}
+			})
+		},
+		delN: function(nub,num) {  //顶
+			//weibo.php?act=del&id=num		
+			ajax({
+				url: 'weibo.php',
+				data: {
+					act: 'del',
+					id: num
+				},
+				succ: function(json) {
+					if(!json.error) {
+						return nub;
+					}
+				}
+			});
+		}
+		
+		
+		
+	};
+	
+	var c = new Create();
+	var btn = document.getElementById('btn1');
+//	var top = document.getElementsByTagName('a');
+
+	c.info(btn); //点击
+	c.txt.addEventListener('keydown',function(ev) {  //按键不能写在info里面  会和click干涉
+		if(ev.keyCode == 13&& ev.ctrlKey) {
+			c.Event();
+		}
+	});
+	
+//	for(var i = 0; i < c.top.length; i++) {
+//		c.top[i].addEventListener('click',function() {  //点赞
+//			c.top[i].innerHTML = c.topN();
+//		});
+//	}
+	
+	
+//})();
+</script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

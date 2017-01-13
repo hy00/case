@@ -1,0 +1,268 @@
+﻿<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title></title>
+<link href="style/weibo.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div class="znsArea">
+<!--留言-->
+     <div class="takeComment">
+        <textarea name="textarea" class="takeTextField" id="tijiaoText"></textarea>
+        <div class="takeSbmComment">
+            <input type="button" id="btn1" class="inputs" value="" />
+            <span>(可按 Enter 回复)</span>
+        </div>
+    </div>
+<!--已留-->
+    <div class="commentOn">
+        <div class="messList" id="div1" style="height:502px">
+        	
+        	<!--<div class="reply">
+                <p class="replyContent">卫士，新款卫士将推出总共14种车身式样。其中， XS旅行款车型售价为32295英镑(约33.6万元)。</p>
+                <p class="operation">
+                    <span class="replyTime">2018-09-08 16:37:60</span>
+                    <span class="handle">
+                    	<a href="javascript:;" class="top">0</a>
+                        <a href="javascript:;" class="down_icon">0</a>
+                        <a href="javascript:;" class="cut">删除</a>
+                    </span>
+                </p>
+            </div>-->
+            
+        </div>
+        <div class="page" id="page">
+        	<a href="javascript:;" class="active">1</a>
+        	<a href="javascript:;">2</a>
+        	<a href="javascript:;">3</a>
+        </div>
+    </div>
+</div>
+</body>
+<script src="jquery-3.1.1.js"></script>
+<script src="mypages-1.0.js"></script>
+<script>
+	var $txt = $('#tijiaoText');
+		$btn = $('#btn1'),
+		$wrap = $('#div1'),
+		hash = window.location.hash;
+//		console.log(hash)
+		//有hash走hash没hash走1
+		if(hash) {
+			hash = hash.split('=')[1];
+		} else {
+			hash = 1;
+			window.location.hash = 'page=1';
+		}
+		
+		//当hash值发生变化的时候
+		window.onhashchange = function() {
+			//拿到当前的hash值
+			hash = window.location.hash.split('=')[1];
+			creatData(hash);  //重新加载数据
+			creatPage(hash);  //重新加载页码
+		};
+		
+		$btn.on('click',function() {
+			var $val = $txt.val();
+			if($val) {
+				//添加一条  weibo.php?act=add&content=xxx
+				$.ajax({
+					url: 'weibo.php',
+					data: {
+						act: 'add',
+						content: $val
+					},
+					success: function(data) {
+						if(!data.error) {
+							creatData(1)
+						}
+					}
+				})
+			} else {
+				alert('要有内容啊！！！')
+			}
+		});
+		
+		
+		function creatDiv(val,time,id,acc,ref) {
+			var $div = $('<div class="reply" pid = "'+id+'">');
+			$div.html(
+				`<p class="replyContent">${val}</p>
+                <p class="operation">
+                    <span class="replyTime">${time}</span>
+                    <span class="handle">
+                    	<a href="javascript:;" class="top">${acc}</a>
+                        <a href="javascript:;" class="down_icon">${ref}</a>
+                        <a href="javascript:;" class="cut">删除</a>
+                    </span>
+                </p>`
+			);
+			
+			//创建元素并加了事件(用事件监听做)
+			$div.on('click',function(ev) {
+				//顶一条weibo.php?act=acc&id=num	
+				if(ev.target.className === 'top') {
+					$.ajax({
+						url:"weibo.php",
+						data: {
+							act: 'acc',
+							id: $(ev.target).closest('.reply').attr('pid')  //这个离top最近的class名叫.reply的父级的id
+						},
+						success: function(json) {
+							json = eval('('+json+')');
+							if(json.error === 0) {
+								var num = $(ev.target).html()*1;
+								num++;
+								$(ev.target).html(num);
+							}
+						}
+					});
+				}
+				
+				//踩一条   weibo.php?act=ref&id=num
+				if(ev.target.className === 'down_icon') {
+					$.ajax({
+						url:"weibo.php",
+						data: {
+							act: 'ref',
+							id: $(ev.target).closest('.reply').attr('pid')
+						},
+						success: function(json) {
+							json = eval('('+json+')');
+							if(json.error === 0) {
+								var num = $(ev.target).html()*1;
+								num++;
+								$(ev.target).html(num);
+							}
+						}
+					});
+				}
+				
+				//删除 weibo.php?act=del&id=num
+				if(ev.target.className === 'cut') {
+					$.ajax({
+						url:"weibo.php",
+						data: {
+							act: 'del',
+							id: $(ev.target).closest('.reply').attr('pid')
+						},
+						success: function(json) {
+							json = eval('('+json+')');
+							if(json.error === 0) {
+								creatData(hash);  //进来了就是已经接收了数据删除了，只需要重新加载一下数据即可
+								creatPage(hash);
+								
+								//最后一页删除后重新获取总页数
+								$.ajax({
+									url: "weibo.php",
+									data: {
+										act: 'get_page_count'
+									},
+									dataType: 'json',
+									success: function(json) {
+										//获取当前的hash值，
+										var a = window.location.hash.split('=')[1];
+										//如果当前的总页数小于hash值，说明最后一页已经删完了，要显示json.count那页。 
+										console.log(a)
+										if(a - json.count == 1) {
+											window.location.hash = 'page='+json.count;
+										}
+									}
+								});
+							}
+						}
+					});
+				}
+			})
+			return $div;
+		};
+		
+		//创建页码 weibo.php?act=get_page_count
+		creatPage(1);
+		function creatPage(num) {
+			$.ajax({
+				url: 'weibo.php',
+				data: {
+					act: 'get_page_count'
+				},
+				dataType: 'json',
+				success: function(json) {
+					pagesFn({
+						parent: '#page',
+						pageAll: json.count,
+						num: hash*1,
+						len: 5,
+						indexFn: function(num) {
+							window.location.hash = 'page='+num;
+						}
+					});
+				}
+			});
+		};
+		
+		
+		//一页数据  weibo.php?act=get&page=2
+		creatData(hash);
+		function creatData(n) {
+			$wrap.html('');
+			$.ajax({
+				url: 'weibo.php',
+				data: {
+					act: 'get',
+					page: n
+				},
+				success: function(arr) {
+					arr = eval('('+arr+')');
+//					console.log(arr)
+					$.each(arr,function(i,e) {
+						$txt.val('');
+						$wrap.append(creatDiv(e.content,tDate(e.time),e.id,e.acc,e.ref));
+					})
+				}
+			});
+		};
+		
+		function tDate(time) {
+			var str = '';
+			var t = new Date(time*1000);
+				year = t.getFullYear(),
+				mon = t.getMonth() + 1,
+				day = t.getDate(),
+				hor = t.getHours(),
+				min = t.getMinutes(),
+				sec = t.getSeconds(),
+			
+			str = year+'-'+toDB(mon)+'-'+toDB(day)+' '+toDB(hor)+':'+toDB(min)+':'+toDB(sec);
+			return str;
+		};
+		
+		function toDB(n) {
+			return n < 10 ? '0'+n: ''+ n;
+		};
+		
+</script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
